@@ -83,10 +83,26 @@ function Form({ onAddItems }) {
 }
 
 function PackingList({ items, onDeleteItems, onToggleItem }) {
+  const [sortBy, setSortBy] = useState("packed");
+
+  let sortedItems;
+
+  if (sortBy === "input") sortedItems = items;
+
+  if (sortBy === "description")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description));
+
+  if (sortBy === "packed")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
+
   return (
     <div className="list">
       <ul>
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <Item
             item={item}
             key={item.id}
@@ -95,6 +111,15 @@ function PackingList({ items, onDeleteItems, onToggleItem }) {
           />
         ))}
       </ul>
+      <select
+        className="actions"
+        value={sortBy}
+        onChange={(e) => setSortBy(e.target.value)}
+      >
+        <option value="input">sort by input order</option>
+        <option value="description">sort by description order</option>
+        <option value="packed">sort by packed order</option>
+      </select>
     </div>
   );
 }
@@ -124,9 +149,8 @@ function Stats({ items }) {
     );
   const numItems = items.length;
   const numPacked = items.filter((item) => item.packed).length;
-  console.log(numPacked);
+
   const percentage = Math.trunc((numPacked / items.length) * 100);
-  console.log(percentage);
 
   return (
     <footer className="stats">
@@ -134,7 +158,7 @@ function Stats({ items }) {
         <p>You have packed everthing,You are ready to go✈️</p>
       ) : (
         <em>
-          You have {numItems} items on your list. You have already packed{" "}
+          You have {numItems} items on your list. You have already packed
           {numPacked} ({percentage}%)
         </em>
       )}
